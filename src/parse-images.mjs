@@ -19,12 +19,62 @@ export default function parseImages(imageSpecs, imageBytes) {
   var count = dataView.getInt32(4, false);
 
 
-  let n_rows = imageSpecs.images[2].value;
-  let n_cols = imageSpecs.images[3].value;
+  const magic_number0 = imageBytes.images[2];
+  const magic_number1 = imageBytes.images[3];
+
+  const magic_number_cal = magic_number0 * 16 * 16 + magic_number1;
+  // console.log(magic_number_cal)
+  const magic_number_actual = imageSpecs.images[0].value;
+
+  const magic_number_labels0 = imageSpecs.labels[2];
+  const magic_number_labels1 = imageBytes.labels[3];
+
+  const magic_number_labels_cal = magic_number_labels0 * 16 * 16 + magic_number_labels1;
+  const magic_number_labels_actual = imageSpecs.labels[0].value;
+  const n_rows = imageBytes.images[11];
+  const n_cols = imageBytes.images[15];
+  const n_rows_actual = imageSpecs.images[2].value;
+  const n_cols_actual = imageSpecs.images[3].value;
+
+  const n_images_label = imageBytes.labels[7];
+  const n_images = imageBytes.images[7];
+
+
+  const n_images_actual = (imageBytes.images.length - 16) / (n_cols_actual * n_rows_actual);
+  const n_images_label_actual = imageBytes.labels.length - 8;
+
+  if (n_images_actual !== n_images_label_actual
+    || n_images !== n_images_label
+  ) {
+    return err('here is an error', { code: 'BAD_FMT' });
+  }
+  if (n_images !== n_images_actual) {
+    return err('here is an error', { code: 'BAD_FMT' });
+
+  }
+
+  if (magic_number_cal !== magic_number_actual
+    || magic_number_labels_cal !== magic_number_labels_actual
+  ) {
+    return err('here is an error', { code: 'BAD_VAL' });
+  }
+
+  if (n_rows_actual !== n_rows) {
+    return err('here is an error', { code: 'BAD_VAL' });
+  }
+
+  if (n_cols_actual !== n_cols) {
+    return err('here is an error', { code: 'BAD_VAL' });
+  }
+
+  if (n_images_label !== n_images_label_actual) {
+    return err('here is an error', { code: 'BAD_FMT' });
+
+  }
 
   var pixelValues = [];
 
-  for (var image = 0; image <= count - 1; image++) {
+  for (var image = 0; image <= n_images - 1; image++) {
     var pixels = [];
 
     for (var y = 0; y <= (n_cols - 1); y++) {
@@ -34,15 +84,13 @@ export default function parseImages(imageSpecs, imageBytes) {
     }
 
     var imageData = {};
-    // var label = imageBytes.labels[image + 8];
-    imageData["features"] = new Uint8Array(pixels);
-    imageData["label"] = JSON.stringify(imageBytes.labels[image + 8]);
+    var label = imageBytes.labels[image + 8];
+    imageData["label"] = JSON.stringify(label);
+    imageData["features"] = pixels;
+    // imageData[ JSON.stringify( label ) ] = pixels;
 
     pixelValues.push(imageData);
   }
-
-  const Result = { val: pixelValues };
-
-  return Result;
+  return { val: pixelValues };
 }
 
