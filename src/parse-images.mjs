@@ -31,7 +31,6 @@ export default function parseImages(imageSpecs, imageBytes) {
   const imageCalculated = (imageBytes.images.length - 16) / (n_rows_actual * n_cols_actual);
   const labelCalculated = imageBytes.labels.length - 8;
 
-  // console.log(nRowsImage, imageSpecs.images[2].value)
 
   if (imageCount !== imageCalculated) {
     return err('here is an error1', { code: 'BAD_FMT' });
@@ -77,7 +76,6 @@ export default function parseImages(imageSpecs, imageBytes) {
     var label = imageBytes.labels[image + 8];
     imageData["label"] = JSON.stringify(label);
     imageData["features"] = pixels;
-    // imageData[ JSON.stringify( label ) ] = pixels;
 
     pixelValues.push(imageData);
 
@@ -85,5 +83,4 @@ export default function parseImages(imageSpecs, imageBytes) {
 
   return { val: pixelValues, hasErrors: false };
 
-  // return err('parseImages() not implemented', { code: 'NO_IMPL' });
 }

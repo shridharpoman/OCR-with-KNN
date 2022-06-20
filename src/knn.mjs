@@ -10,12 +10,15 @@ import { ok, err } from 'cs544-js-utils';
  *             different from length of subject testFeatures.
  */
 export default function knn(testFeatures, trainLabeledFeatures, k = 3) {
-  // console.log(trainLabeledFeatures[0].features)
+  const trainLength = trainLabeledFeatures[0].features.length;
+  const testLength = testFeatures.length;
+  if (trainLength !== testLength) {
+    return err('here is an error1', { code: 'BAD_FMT' });
+  }
+
   const pred = []
   let maxDistanceInPred;
-  // console.log(testFeatures.length)
-  // const len = testFeatures.length
-  // console.log(dist(testFeatures, trainLabeledFeatures[50].features))
+
   for (let index = 0, len = testFeatures.length; index < len; index++) {
     // console.log(index)
     const seconsPoint = trainLabeledFeatures[index].features
@@ -47,14 +50,10 @@ export default function knn(testFeatures, trainLabeledFeatures, k = 3) {
   pred.forEach(obj => {
     delete obj['distance']
   })
-
   const leastPred = pred[0]
   const arry = new Array(leastPred.label, leastPred.index)
-  // console.log(arry)
-  // console.log({ val: arry })
-  return { val: arry }
-  // console.log(trainLabeledFeatures)
-  // return err('knn() not implemented', { code: 'NO_IMPL' });
+
+  return { val: arry, hasErrors: false }
 }
 
 const distance = (a, b) => Math.sqrt(
