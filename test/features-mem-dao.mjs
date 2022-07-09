@@ -20,7 +20,7 @@ export default class {
     await dao.close();
     await dao._mongod.stop();
     assert.equal(dao._mongod.getInstanceInfo(), false,
-     `mongo memory server stop failed`);
+		 `mongo memory server stop failed`);
   }
   */
   static async setup() {
@@ -38,7 +38,7 @@ export default class {
     await dao.close();
     await dao._mongod.stop();
     assert.equal(dao._mongod.instanceInfo, undefined,
-      `mongo memory server stop failed`);
+		 `mongo memory server stop failed`);
   }
 
 }
