@@ -1,26 +1,19 @@
 {
-  "name": "prj2-sol",
+  "name": "cs544-js-utils",
   "version": "1.0.0",
   "description": "",
   "main": "main.mjs",
   "scripts": {
     "test": "mocha test/",
     "debug-test": "mocha --inspect-brk test/",
+    "ts-check": "tsc --build",
     "syntax-check": "shopt -s globstar; for f in **/*.mjs; do node -c $f; done;"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "cs544-js-utils": "file:lib/cs544-js-utils",
-    "cs544-node-utils": "file:lib/cs544-node-utils",
-    "mongodb": "^4.7.0",
-    "prj1-sol": "file:lib/prj1-sol",
-    "prj2-sol": "file:lib/prj2-sol"
-  },
   "devDependencies": {
     "chai": "^4.3.6",
-    "mocha": "^10.0.0",
-    "mongodb-memory-server": "^8.7.0"
+    "mocha": "^10.0.0"
   }
 }

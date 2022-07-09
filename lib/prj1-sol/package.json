@@ -1,5 +1,5 @@
 {
-  "name": "prj2-sol",
+  "name": "prj1-sol",
   "version": "1.0.0",
   "description": "",
   "main": "main.mjs",
@@ -11,16 +11,12 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "cs544-js-utils": "file:lib/cs544-js-utils",
-    "cs544-node-utils": "file:lib/cs544-node-utils",
-    "mongodb": "^4.7.0",
-    "prj1-sol": "file:lib/prj1-sol",
-    "prj2-sol": "file:lib/prj2-sol"
-  },
   "devDependencies": {
     "chai": "^4.3.6",
-    "mocha": "^10.0.0",
-    "mongodb-memory-server": "^8.7.0"
+    "moch": "^0.0.1",
+    "mocha": "^10.0.0"
+  },
+  "dependencies": {
+    "cs544-js-utils": "file:../../../cs544/lib/cs544-js-utils"
   }
 }
