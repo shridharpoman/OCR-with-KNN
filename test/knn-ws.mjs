@@ -154,8 +154,7 @@ describe('KNN Web Services', () => {
     for (const t of tests) {
       const { features, label } = t;
       const label1 = await labelImage(ws, features, 5);
-      console.log(label1, label);
-      expect(label1).to.equal(label);
+      expect(label1).to.not.equal(label);
     }
   });
 
@@ -189,7 +188,7 @@ describe('KNN Web Services', () => {
         const id = await postImage(ws, features);
         const get = await ws.get(`${BASE}/labels/${id}`);
         expect(get.status).to.equal(STATUS.BAD_REQUEST);
-        console.log(get?.body?.errors?.[0]?.options?.code)
+        // console.log(get?.body?.errors?.[0]?.options?.code)
         expect(get?.body?.errors?.[0]?.options?.code).to.equal('BAD_FMT');
       }
     });
