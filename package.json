@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha test/",
     "debug-test": "mocha --inspect-brk test/",
-    "syntax-check": "shopt -s globstar; for f in **/*.mjs; do node -c $f; done;"
+    "syntax-check": "shopt -s globstar; for f in **/*.mjs; do node -c $f; done;",
+    "postinstall": "(cd lib/cs544-js-utils && npm install); (cd lib/cs544-node-utils && npm install); (cd lib/prj1-sol && npm install); (cd lib/prj2-sol && npm install);"
   },
   "keywords": [],
   "author": "",
