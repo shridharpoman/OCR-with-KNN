@@ -1,6 +1,5 @@
-Name:		XXX
-B-Number:	XXX
-Email:		XXX
+Name:		Shridhar Poman
+B-Number:	B00862781
+Email:		spoman1@binghamton.edu
 
-Add text here as needed.
-
+I have added postinsatll script to install all nested dependencies so that TA won't need to npm install all manually. :smile:
