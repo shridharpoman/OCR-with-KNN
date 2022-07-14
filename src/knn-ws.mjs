@@ -22,20 +22,22 @@ export const DEFAULT_COUNT = 5;
 export default async function serve(knnConfig, dao, data) {
   try {
     const app = express();
-
-
-    //TODO: squirrel away knnConfig params and dao in app.locals.
+    app.locals = {
+      base: knnConfig.base,
+      k: knnConfig.k,
+      dao,
+      data,
+    };
 
 
     if (data) {
-      //TODO: load data into dao
-
+      await dao.clear();
+      for (const { features, label } of data) {
+        await dao.add(new Uint8Array(features), false, label);
+      }
     }
-
-    //TODO: get all training results from dao and squirrel away in app.locals
-
-    //set up routes
     setupRoutes(app);
+
 
     return ok(app);
   }
@@ -49,10 +51,14 @@ function setupRoutes(app) {
   const base = app.locals.base;
   app.use(cors({ exposedHeaders: 'Location' }));
   app.use(express.json({ strict: false })); //false to allow string body
+  app.post(`${base}/images`, doPostImage(app));
+  app.get(`${base}/images/:imageId`, doGetImages(app));
+  app.get(`${base}/labels/:imageId/:k?`, doClassify(app));
+  app.get(`${base}/clear`, doClear(app));
   //app.use(express.text());
-
+  app.get(`${base}`, dummyHandler(app));
   //uncomment to log requested URLs on server stderr
-  //app.use(doLogRequest(app));
+  // app.use(doLogRequest(app));
 
   //TODO: add knn routes here
 
@@ -60,6 +66,142 @@ function setupRoutes(app) {
   app.use(do404(app));
   app.use(doErrors(app));
 }
+
+//The request body must be a JSON string containing a base-64 test image; i.e. the base-64 encoding must be surrounded within double quotes. This image should be stored in the database and an ID identifying the image should be returned as the id property of the JSON response.
+function doPostImage(app) {
+  return async (req, res) => {
+
+    const base = app.locals.base;
+    const dao = app.locals.dao;
+    try {
+      const imageB64 = req.body;
+
+      const imageBytes = b64ToUint8Array(imageB64);
+      const id = await dao.add(imageBytes, false);
+      const location = `${base}/images/${id.val}`;
+      res.setHeader('Location', location);
+      res.status(STATUS.OK).json({ id: id.val });
+
+    }
+    catch (e) {
+      const mapped = mapResultErrors(e);
+      res.status(mapped.status).json(mapped);
+    }
+  }
+}
+
+/* Retrieves the image specified by IMAGE_ID from the underlying database. Return a JSON response having the following two properties:
+
+features
+A base-64 representation of the retrieved image bytes.
+
+label
+The label associated with the image (if any).
+
+Return a 404 NOT_FOUND response if the image specified by IMAGE_ID does not exist. \
+
+*/
+
+function doGetImages(app) {
+  return async (req, res) => {
+    // console.log(req.params.imageId)
+    const base = app.locals.base;
+    const dao = app.locals.dao;
+    const imageId = req.params.imageId;
+    // console.log(imageId);
+    try {
+      const result = await dao.get(imageId);
+      // console.log(image)
+      if (result.hasErrors) {
+        res.status(STATUS.NOT_FOUND).json(result);
+        return;
+      }
+      const imageB64 = uint8ArrayToB64(result.val.features);
+      // console.log(imageB64);
+      res.status(STATUS.OK).json({ features: imageB64, label: result.val.label });
+    }
+    catch (e) {
+      const mapped = mapResultErrors(e);
+      res.status(mapped.status).json(mapped);
+    }
+  }
+}
+
+function doClear(app) {
+  return async function (req, res) {
+    const dao = app.locals.dao;
+    try {
+      await dao.clear();
+      res.status(STATUS.OK).json({});
+    }
+    catch (e) {
+      const mapped = mapResultErrors(e);
+      res.status(mapped.status).json(mapped);
+    }
+  }
+}
+
+/*
+
+  must correctly classify tests despite two incorrectly labeled images when k == 5:
+
+ */
+
+function doClassify(app) {
+  return async (req, res) => {
+    const base = app.locals.base;
+    const dao = app.locals.dao;
+    const imageId = req.params.imageId;
+    const k = req.params.k;
+    try {
+      const result = await dao.get(imageId);
+      const resultBuff = Buffer.from(result.val.features);
+      if (result.hasErrors) {
+        res.status(STATUS.NOT_FOUND).json(result);
+        return;
+      }
+      const trainResult = await dao.getAllTrainingFeatures();
+
+
+      if (trainResult.hasErrors) {
+        res.status(STATUS.NOT_FOUND).json(trainResult);
+        return;
+      }
+
+      const trainData = trainResult.val.map(x => {
+        if (x.features.length !== result.val.features.length) {
+          // get?.body?.errors?.[0]?.options?.code equals 'BAD_FMT'
+          res.status(STATUS.BAD_REQUEST).json({ errors: [{ options: { code: 'BAD_FMT' } }] });
+          return;
+        }
+        return {
+          features: Buffer.from(x.features),
+          label: x.label,
+        }
+      }
+      );
+
+
+      // // delete elements with null
+      // trainData.splice(0, trainData.length, ...trainData.filter(x => x !== null));
+
+
+      const knnResult = knn(resultBuff, trainData, k);
+      const knnId = trainResult.val[knnResult.val[1]];
+      const knnLabel = knnResult.val[0];
+      res.status(STATUS.OK).json({ id: knnId.id, label: knnLabel });
+    }
+    catch (e) {
+      const mapped = mapResultErrors(e);
+      res.status(mapped.status).json(mapped);
+    }
+  }
+}
+
+
+
+
+
 
 
 //dummy handler to test initial routing and to use as a template
@@ -155,4 +297,3 @@ function mapResultErrors(err) {
   if (status === STATUS.INTERNAL_SERVER_ERROR) console.error(errors);
   return { status, errors, };
 }
-

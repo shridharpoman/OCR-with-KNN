@@ -32,6 +32,7 @@ describe('KNN Web Services', () => {
 
   async function postImage(ws, uint8bytes) {
     const imageB64 = uint8ArrayToB64(uint8bytes);
+    // console.log(uint8bytes)
     const post = await ws.post(`${BASE}/images`)
       .set('content-type', 'application/json')
       .send(`"${imageB64}"`);
@@ -41,8 +42,8 @@ describe('KNN Web Services', () => {
     expect(id.length).to.be.greaterThan(0);
     return id;
   }
-  
-  async function labelImage(ws, uint8Bytes, k=3) {
+
+  async function labelImage(ws, uint8Bytes, k = 3) {
     const id = await postImage(ws, uint8Bytes);
     const get = await ws.get(`${BASE}/labels/${id}?k=${k}`);
     expect(get.status).to.equal(STATUS.OK);
@@ -68,7 +69,7 @@ describe('KNN Web Services', () => {
     const id = await postImage(ws, imageBytes);
     const get = await ws.get(`${BASE}/images/${id}`);
     const imageB64 = uint8ArrayToB64(new Uint8Array(imageBytes));
-    expect(get.body.features).to.equal(imageB64);    
+    expect(get.body.features).to.equal(imageB64);
   });
 
   it('must get a NOT_FOND error on retrieving image with bad ID', async () => {
@@ -119,40 +120,41 @@ describe('KNN Web Services', () => {
       expect(label1).to.be.a('string');
       expect(label1.length).to.be.greaterThan(0);
       const get2 = await ws.get(`${BASE}/images/${id1}`);
-      expect(get2.body.label).to.equal(label1);    
+      expect(get2.body.label).to.equal(label1);
     }
   });
-  
-  
+
+
   it('must correctly classify test despite single incorrectly labeled image',
-     async () => {
-    const train = randLabeledFeatures(N_BYTES, 200);
-    for (let label = 0; label < 10; label++) {
-      const features = randUint8Array(N_BYTES, (label + 1)*20, 0);
-      train.push({features, label: ((label + 1)%10).toString()});
-    }
-    const ws = await startServe(train);
-       const tests = randLabeledFeatures(N_BYTES, 40, 5);
-    for (const t of tests) {
-      const { features, label } = t;
-      const label1 = await labelImage(ws, features);
-      expect(label1).to.equal(label);
-    }
-  });
+    async () => {
+      const train = randLabeledFeatures(N_BYTES, 200);
+      for (let label = 0; label < 10; label++) {
+        const features = randUint8Array(N_BYTES, (label + 1) * 20, 0);
+        train.push({ features, label: ((label + 1) % 10).toString() });
+      }
+      const ws = await startServe(train);
+      const tests = randLabeledFeatures(N_BYTES, 40, 5);
+      for (const t of tests) {
+        const { features, label } = t;
+        const label1 = await labelImage(ws, features);
+        expect(label1).to.equal(label);
+      }
+    });
 
   it(`must correctly classify tests despite two
       incorrectly labeled images when k == 5`.trim(), async () => {
     const train = randLabeledFeatures(N_BYTES, 200);
     for (let label = 0; label < 10; label++) {
-      const features = randUint8Array(N_BYTES, (label + 1)*20, 0);
-      train.push({features, label: ((label + 1)%10).toString()});
-      train.push({features, label: ((label + 2)%10).toString()});
+      const features = randUint8Array(N_BYTES, (label + 1) * 20, 0);
+      train.push({ features, label: ((label + 1) % 10).toString() });
+      train.push({ features, label: ((label + 2) % 10).toString() });
     }
     const ws = await startServe(train);
-	const tests = randLabeledFeatures(N_BYTES, 40, 5);
+    const tests = randLabeledFeatures(N_BYTES, 40, 5);
     for (const t of tests) {
       const { features, label } = t;
       const label1 = await labelImage(ws, features, 5);
+      console.log(label1, label);
       expect(label1).to.equal(label);
     }
   });
@@ -160,46 +162,47 @@ describe('KNN Web Services', () => {
   //uses k = 3, with 2 incorrectly labeled training images which exactly
   //match test images.
   it('must incorrectly classify tests when too many bad labeled images',
-     async () => {
-    const train = randLabeledFeatures(N_BYTES, 200);
-    for (let label = 0; label < 10; label++) {
-      const features = randUint8Array(N_BYTES, (label + 1)*20, 0);
-      train.push({features, label: ((label + 1)%10).toString()});
-      train.push({features, label: ((label + 2)%10).toString()});
-    }
-    const ws = await startServe(train);
-    const tests = randLabeledFeatures(N_BYTES, 40, 0);
-    for (const t of tests) {
-      const { features, label } = t;
-      const label1 = await labelImage(ws, features, 3);
-      expect(label1).to.not.equal(label);
-    }
-  });
+    async () => {
+      const train = randLabeledFeatures(N_BYTES, 200);
+      for (let label = 0; label < 10; label++) {
+        const features = randUint8Array(N_BYTES, (label + 1) * 20, 0);
+        train.push({ features, label: ((label + 1) % 10).toString() });
+        train.push({ features, label: ((label + 2) % 10).toString() });
+      }
+      const ws = await startServe(train);
+      const tests = randLabeledFeatures(N_BYTES, 40, 0);
+      for (const t of tests) {
+        const { features, label } = t;
+        const label1 = await labelImage(ws, features, 3);
+        expect(label1).to.not.equal(label);
+      }
+    });
 
 
   it('must detect BAD_FMT error when training & test # bytes differ ',
-     async () => {
-    const train = randLabeledFeatures(N_BYTES, 200);
-    const ws = await startServe(train);
-    const tests = randLabeledFeatures(N_BYTES+1, 5);
-    for (const t of tests) {
-      const { features, label } = t;
-      const id = await postImage(ws, features);
-      const get = await ws.get(`${BASE}/labels/${id}`);
-      expect(get.status).to.equal(STATUS.BAD_REQUEST);
-      expect(get?.body?.errors?.[0]?.options?.code).to.equal('BAD_FMT');
-    }
-  });
+    async () => {
+      const train = randLabeledFeatures(N_BYTES, 200);
+      const ws = await startServe(train);
+      const tests = randLabeledFeatures(N_BYTES + 1, 5);
+      for (const t of tests) {
+        const { features, label } = t;
+        const id = await postImage(ws, features);
+        const get = await ws.get(`${BASE}/labels/${id}`);
+        expect(get.status).to.equal(STATUS.BAD_REQUEST);
+        console.log(get?.body?.errors?.[0]?.options?.code)
+        expect(get?.body?.errors?.[0]?.options?.code).to.equal('BAD_FMT');
+      }
+    });
 
-  
+
 });
 
 
 /** return random int in closed interval [n - k, n + k] */
 function randVal(n, k) {
-  const k2 = 2*k + 1;
+  const k2 = 2 * k + 1;
   const rand = Math.random();
-  return Math.trunc(n - k + rand*k2);
+  return Math.trunc(n - k + rand * k2);
 }
 
 /** return n random bytes in closed interval [v - k, v + k] */
@@ -213,13 +216,13 @@ function randUint8Array(n, v, k) {
  *  with label between 0 and 9 with bytes for label lab being in
  *  closed interval [ 20*(label+1) + 9, 20*(label+1) - 9]
  */
-function randLabeledFeatures(nBytes, n, k=9) {
+function randLabeledFeatures(nBytes, n, k = 9) {
   const labeledImages = [];
   for (let i = 0; i < n; i++) {
-    const label = Math.trunc(10*Math.random()); //0, 1, ..., 8, 9
+    const label = Math.trunc(10 * Math.random()); //0, 1, ..., 8, 9
     const base = (label + 1) * 20;  //20, 40, ..., 180, 200
     const features = randUint8Array(nBytes, base, k);
-    labeledImages.push({features, label: label.toString()});
+    labeledImages.push({ features, label: label.toString() });
   }
   return labeledImages;
 }

@@ -60,7 +60,6 @@ export default async function main(args) {
     if (args.length === 2) {
       const dataDir = args[1];
       trainLabeledFeatures = await loadData(args[1], FILE_NAMES);
-      console.log(trainLabeledFeatures)
     }
     const serveResult = await serve(config.knn, dao, trainLabeledFeatures);
     if (serveResult.hasErrors) panic(serveResult);
