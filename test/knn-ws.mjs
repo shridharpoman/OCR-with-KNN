@@ -147,14 +147,14 @@ describe('KNN Web Services', () => {
     for (let label = 0; label < 10; label++) {
       const features = randUint8Array(N_BYTES, (label + 1) * 20, 0);
       train.push({ features, label: ((label + 1) % 10).toString() });
-      train.push({ features, label: ((label + 2) % 10).toString() });
+      train.push({ features, label: ((label + 1) % 10).toString() });
     }
     const ws = await startServe(train);
     const tests = randLabeledFeatures(N_BYTES, 40, 5);
     for (const t of tests) {
       const { features, label } = t;
       const label1 = await labelImage(ws, features, 5);
-      expect(label1).to.not.equal(label);
+      expect(label1).to.equal(label);
     }
   });
 
