@@ -2,12 +2,4 @@ Name:		Shridhar Poman
 B-Number:	B00862781
 Email:		spoman1@binghamton.edu
 
-References:
-
-https://github.com/venil7/machine-learning-mnist/blob/master/src/mnist/convert.js
-
-https://liferayui.com/building-knn-algorithm/
-
-https://github.com/mljs/knn
-
-
+I have added postinsatll script to install all nested dependencies so that TA won't need to npm install all manually. :smile:

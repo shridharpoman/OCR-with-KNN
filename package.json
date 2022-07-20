@@ -1,33 +1,33 @@
 {
-  "name": "prj1-sol",
+  "name": "prj2-sol",
   "version": "1.0.0",
-  "description": "Name:\t\tXXX B-Number:\tXXX Email:\t\tXXX",
-  "main": "index.js",
+  "description": "",
+  "main": "main.mjs",
   "scripts": {
     "test": "mocha test/",
     "debug-test": "mocha --inspect-brk test/",
-    "syntax-check": "shopt -s globstar; for f in **/*.mjs; do node -c $f; done;"
+    "syntax-check": "shopt -s globstar; for f in **/*.mjs; do node -c $f; done;",
+    "postinstall": "(cd lib/cs544-js-utils && npm install); (cd lib/cs544-node-utils && npm install); (cd lib/prj1-sol && npm install); (cd lib/prj2-sol && npm install);"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
+    "cs544-js-utils": "file:lib/cs544-js-utils",
+    "cs544-node-utils": "file:lib/cs544-node-utils",
+    "express": "^4.18.1",
+    "http-status": "^1.5.2",
+    "mongodb": "^4.7.0",
+    "prj1-sol": "file:lib/prj1-sol",
+    "prj2-sol": "file:lib/prj2-sol",
+    "supertest": "^6.2.4"
+  },
   "devDependencies": {
     "chai": "^4.3.6",
-    "moch": "^0.0.1",
-    "mocha": "^10.0.0"
-  },
-  "dependencies": {
-    "cs544-js-utils": "file:../../../cs544/lib/cs544-js-utils"
-  },
-  "directories": {
-    "test": "test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/shridharpoman/cs544-project1.git"
-  },
-  "bugs": {
-    "url": "https://github.com/shridharpoman/cs544-project1/issues"
-  },
-  "homepage": "https://github.com/shridharpoman/cs544-project1#readme"
+    "mocha": "^10.0.0",
+    "mongodb-memory-server": "^8.7.0",
+    "nodemon": "^2.0.19"
+  }
 }
