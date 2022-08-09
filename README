@@ -2,4 +2,9 @@ Name:		Shridhar Poman
 B-Number:	B00862781
 Email:		spoman1@binghamton.edu
 
+npm i --legacy-peer-deps 
+to install all packages
+
 I have added postinsatll script to install all nested dependencies so that TA won't need to npm install all manually. :smile:
+
+ref: https://github.com/um4ng-tiw/Handwritten_Digit_Recognizer/tree/master/frontend/src

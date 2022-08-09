@@ -1,24 +1,45 @@
 {
-  "name": "prj2-sol",
-  "version": "1.0.0",
-  "description": "",
-  "main": "main.mjs",
+  "name": "prj5-sol",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.10.0",
+    "@emotion/styled": "^11.10.0",
+    "@mui/material": "^5.9.3",
+    "@mui/styles": "^5.9.3",
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "cs544-js-utils": "file:lib/cs544-js-utils",
+    "parcel-bundler": "^1.12.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
+  },
   "scripts": {
-    "start": "parcel src/index.html  --port 2346",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "syntax-check": "shopt -s globstar; for f in **/*.mjs; do node -c $f; done;",
+    "start": "PORT=3002 react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
     "postinstall": "cd lib/cs544-js-utils && npm install"
   },
-  "browserslist": [
-    "defaults",
-    "not IE 11",
-    "maintained node versions"
-  ],
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "cs544-js-utils": "file:lib/cs544-js-utils",
-    "parcel-bundler": "^1.12.5"
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
